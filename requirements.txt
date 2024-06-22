@@ -1,0 +1,7 @@
+streamlit
+yfinance
+pandas
+ta
+base64
+plotly.graph_objects
+plotly.express
