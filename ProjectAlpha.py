@@ -374,12 +374,40 @@ if st.button("Get Data"):
         fig_gauge_meter.update_layout(paper_bgcolor = "lavender", font = {'color': "darkblue", 'family': "Arial"})
 
         st.plotly_chart(fig_gauge_meter, use_container_width=True)
-        
 
-        
-
-
-    
+        st.markdown(
+            """
+            <style>
+            .footer {
+                position: fixed;
+                left: 0;
+                bottom: 0;
+                width: 100%;
+                background-color: #f1f1f1;
+                color: black;
+                text-align: center;
+                padding: 10px;
+            }
+            .footer a {
+                color: #0a66c2; /* Color for links */
+                text-decoration: none;
+                margin: 0 10px;
+            }
+            .footer a:hover {
+                text-decoration: underline;
+            }
+            </style>
+            <div class="footer">
+                <p>by Apurba</p>
+                <p>
+                    <a href="https://www.linkedin.com/in/apurba-kumar-show/" target="_blank">Instagram</a> |
+                    <a href="https://github.com/IITApurba" target="_blank">GitHub</a> |
+                    <a href="https://www.linkedin.com/in/apurba-kumar-show" target="_blank">LinkedIn</a>
+                </p>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
 
     else:
         st.error("Please provide all inputs.")
