@@ -340,6 +340,46 @@ if st.button("Get Data"):
 
         st.subheader("Trading Signals")
         st.dataframe(results)
+        
+        b_last = results['Buy'].iloc[-1]
+        s_last = results['Sell'].iloc[-1]
+        n_last = results['Neutral'].iloc[-1]
+        
+        Indi_val = (b_last*1 + s_last*-1 +n_last*0)/(b_last+s_last+n_last)
+        Indi_val = Indi_val*100
+
+        fig_gauge_meter = go.Figure(go.Indicator(
+        mode = "gauge+number",
+        value = Indi_val,
+        domain = {'x': [0, 1], 'y': [0, 1]},
+        title = {'text': "Bullishness", 'font': {'size': 24}},
+        gauge = {
+            'axis': {'range': [-100, 100], 'tickwidth': 1, 'tickcolor': "darkblue"},
+            'bar': {'color': "white", 'thickness': 0.1},
+            'bgcolor': "white",
+            'borderwidth': 2,
+            'bordercolor': "gray",
+            'steps': [
+            {'range': [-100, -60], 'color': "#1f77b4"},
+            {'range': [-60, -20], 'color': "#aec7e8"},
+            {'range': [-20, 20], 'color': "#ffbb78"},
+            {'range': [20, 60], 'color': "#ff7f0e"},
+            {'range': [60, 100], 'color': "#d62728"}
+            ],
+            'threshold': {
+                'line': {'color': "red", 'width': 4},
+                'thickness': 0.75,
+                'value': 95}}))
+
+        fig_gauge_meter.update_layout(paper_bgcolor = "lavender", font = {'color': "darkblue", 'family': "Arial"})
+
+        st.plotly_chart(fig_gauge_meter, use_container_width=True)
+        
+
+        
+
+
+    
 
     else:
         st.error("Please provide all inputs.")
