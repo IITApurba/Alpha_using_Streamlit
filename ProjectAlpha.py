@@ -414,7 +414,7 @@ if st.button("Get Data"):
             unsafe_allow_html=True
         )
 
-            end_date = datetime.today()
+        end_date = datetime.today()
         start_date = end_date - timedelta(days=5*365)
 
         data = yf.download(ticker, start=start_date, end=end_date)
