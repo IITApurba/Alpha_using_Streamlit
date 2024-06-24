@@ -1,10 +1,15 @@
 import streamlit as st
 import yfinance as yf
 import pandas as pd
+import numpy as np
 import ta
 import base64
 import plotly.graph_objects as go
 import plotly.express as px
+from sklearn.preprocessing import MinMaxScaler
+from keras.models import Sequential
+from keras.layers import LSTM, Dense
+from datetime import datetime, timedelta
 
 # Streamlit page configuration
 st.set_page_config(page_title="Stock Analysis Dashboard", layout="wide")
@@ -491,7 +496,7 @@ if st.button("Get Data"):
         fig_p.add_trace(go.Scatter(x=future_dates, y=predicted_prices.flatten(), mode='lines', name='Forecasted Price'))
         fig_p.update_layout(title='Stock Price Prediction', xaxis_title='Date', yaxis_title='Close Price USD ($)')
         st.plotly_chart(fig_p, use_container_width=True)
-
+        
 
     else:
         st.error("Please provide all inputs.")
