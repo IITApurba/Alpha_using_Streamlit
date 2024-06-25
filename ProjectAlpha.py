@@ -1,10 +1,15 @@
 import streamlit as st
 import yfinance as yf
 import pandas as pd
+import numpy as np
 import ta
 import base64
 import plotly.graph_objects as go
 import plotly.express as px
+from sklearn.preprocessing import MinMaxScaler
+from keras.models import Sequential
+from keras.layers import LSTM, Dense
+from datetime import datetime, timedelta
 
 # Streamlit page configuration
 st.set_page_config(page_title="Stock Analysis Dashboard", layout="wide")
@@ -408,6 +413,89 @@ if st.button("Get Data"):
             """,
             unsafe_allow_html=True
         )
+
+        end_date = datetime.today()
+        start_date = end_date - timedelta(days=5*365)
+
+        data = yf.download(ticker, start=start_date, end=end_date)
+
+        data = data[['Close']]
+        # Normalize the data
+        scaler = MinMaxScaler(feature_range=(0, 1))
+        scaled_data = scaler.fit_transform(data)
+
+        # Create training data
+        train_data_len = int(np.ceil(len(scaled_data) * 0.8))
+
+        train_data = scaled_data[0:train_data_len, :]
+        x_train = []
+        y_train = []
+
+        for i in range(60, len(train_data)):
+            x_train.append(train_data[i-60:i, 0])
+            y_train.append(train_data[i, 0])
+
+        x_train, y_train = np.array(x_train), np.array(y_train)
+        x_train = np.reshape(x_train, (x_train.shape[0], x_train.shape[1], 1))
+
+
+        # Build the LSTM model
+        model = Sequential()
+        model.add(LSTM(units=50, return_sequences=True, input_shape=(x_train.shape[1], 1)))
+        model.add(LSTM(units=50, return_sequences=False))
+        model.add(Dense(units=25))
+        model.add(Dense(units=1))
+
+        # Compile the model
+        model.compile(optimizer='adam', loss='mean_squared_error')
+
+        # Train the model
+        model.fit(x_train, y_train, batch_size=1, epochs=5)
+
+        # Create the testing data
+        test_data = scaled_data[train_data_len - 60:, :]
+        x_test = []
+        y_test = data['Close'][train_data_len:].values
+
+        for i in range(60, len(test_data)):
+            x_test.append(test_data[i-60:i, 0])
+
+        x_test = np.array(x_test)
+        x_test = np.reshape(x_test, (x_test.shape[0], x_test.shape[1], 1))
+
+        # Get the model's predicted price values
+        predictions = model.predict(x_test)
+        predictions = scaler.inverse_transform(predictions)
+
+
+        # Plot the data
+        train = data[:train_data_len]
+        valid = data[train_data_len:]
+        valid['Predictions'] = predictions
+
+        # Forecast the next 30 days
+        last_60_days = scaled_data[-60:]
+        forecast_input = last_60_days.reshape((1, last_60_days.shape[0], 1))
+        predicted_prices = []
+
+        for _ in range(30):
+            prediction = model.predict(forecast_input)
+            predicted_prices.append(prediction[0, 0])
+            forecast_input = np.append(forecast_input[:, 1:, :], prediction.reshape(1, 1, 1), axis=1)
+
+        predicted_prices = scaler.inverse_transform(np.array(predicted_prices).reshape(-1, 1))
+
+        # Create dates for the next 30 days
+        future_dates = pd.date_range(end_date, periods=30).tolist()
+
+        # Plot forecasted prices
+        fig_p = go.Figure()
+        fig_p.add_trace(go.Scatter(x=train.index, y=train['Close'], mode='lines', name='Training Data'))
+        fig_p.add_trace(go.Scatter(x=valid.index, y=valid['Close'], mode='lines', name='Actual Price'))
+        fig_p.add_trace(go.Scatter(x=valid.index, y=valid['Predictions'], mode='lines', name='Predicted Price'))
+        fig_p.add_trace(go.Scatter(x=future_dates, y=predicted_prices.flatten(), mode='lines', name='Forecasted Price'))
+        fig_p.update_layout(title='Stock Price Prediction', xaxis_title='Date', yaxis_title='Close Price USD ($)')
+        st.plotly_chart(fig_p, use_container_width=True)
 
     else:
         st.error("Please provide all inputs.")
