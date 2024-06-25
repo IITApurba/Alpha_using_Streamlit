@@ -450,7 +450,7 @@ if st.button("Get Data"):
         model.compile(optimizer='adam', loss='mean_squared_error')
 
         # Train the model
-        model.fit(x_train, y_train, batch_size=1, epochs=5)
+        model.fit(x_train, y_train, batch_size=1, epochs=2)
 
         # Create the testing data
         test_data = scaled_data[train_data_len - 60:, :]
