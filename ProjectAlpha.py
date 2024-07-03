@@ -17,7 +17,7 @@ st.set_page_config(page_title="Stock Analysis Dashboard", layout="wide")
 st.title("Stock Analysis Dashboard")
 
 # User inputs
-ticker = st.text_input("Enter ticker symbol (e.g., AAPL):")
+ticker = st.text_input("Enter ticker symbol (e.g. TATAMOTORS.NS):")
 period = st.selectbox("Select period:", ['1d', '5d', '1mo', '3mo', '6mo', '1y', '2y', '5y', '10y', 'ytd', 'max'])
 interval = st.selectbox("Select interval:", ['1m', '2m', '5m', '15m', '30m', '60m', '90m', '1h', '1d', '5d', '1wk', '1mo', '3mo'])
 
@@ -494,7 +494,7 @@ if st.button("Get Data"):
         fig_p.add_trace(go.Scatter(x=valid.index, y=valid['Close'], mode='lines', name='Actual Price'))
         fig_p.add_trace(go.Scatter(x=valid.index, y=valid['Predictions'], mode='lines', name='Predicted Price'))
         fig_p.add_trace(go.Scatter(x=future_dates, y=predicted_prices.flatten(), mode='lines', name='Forecasted Price'))
-        fig_p.update_layout(title='Stock Price Prediction', xaxis_title='Date', yaxis_title='Close Price USD ($)')
+        fig_p.update_layout(title='Stock Price Prediction', xaxis_title='Date', yaxis_title='Close Price')
         st.plotly_chart(fig_p, use_container_width=True)
 
     else:
